@@ -26,7 +26,7 @@ jscs:disable disallowMixedSpacesAndTabs, requireDotNotation, requirePaddingNewLi
       }
 
       function addExistingObsSetToForm(model, restObs) {
-        // callback(_getSections(model));
+        _addExistingObsToSections(model, restObs);
       }
 
       function _parseDate(value, format, offset) {
@@ -56,19 +56,54 @@ jscs:disable disallowMixedSpacesAndTabs, requireDotNotation, requirePaddingNewLi
       }
 
       function _addObsToField(field, obs) {
-        var val = _.find(obs, function(o) {
-          if (o.concept === field.concept) {return o;}
+        var val = _.filter(obs, function(o) {
+          if (o.concept.uuid === field.concept) {return o;}
         });
 
-        if (!(_.isUndefined(val))) {
-          if (!(_.isUndefined(val.value.uuid))) {
-            field.initialValue = val.value.uuid;
-            field.initialUuid = val.uuid;
+        var opts = [];
+        var optsUuid = [];
+        _.each(val, function(o) {
+          if (field.schemaQuestion.questionOptions.rendering === 'date') {
+            field.initialValue = new Date(o.value);
+            field.initialUuid = o.uuid;
+            field.value = new Date(o.value);
+          } else if (field.schemaQuestion.questionOptions.rendering === 'multiCheckbox') {
+            if (!(_.isUndefined(o.value.uuid))) {
+              opt.push(o.value.uuid);
+              optsUuid.push(o.uuid);
+            } else {
+              opt.push(o.value);
+              optsUuid.push(o.uuid);
+            }
+
+            field.initialValue = opts;
+            field.initialUuid = optsUuid;
+            field.value = opts;
           } else {
-            field.initialValue = val.value;
-            field.initialUuid = val.uuid;
+            if (!(_.isUndefined(o.value.uuid))) {
+              field.initialValue = o.value.uuid;
+              field.initialUuid = o.uuid;
+              field.value = o.value.uuid;
+            } else {
+              field.initialValue = o.value;
+              field.initialUuid = o.uuid;
+              field.value = o.value;
+            }
           }
+        });
+      }
+
+      function getGroupSectionObs(obs, concept, nRepeats) {
+        var results = {obs:[]};
+        var val = _.find(obs, function(o) {
+          if (o.concept.uuid === concept) {return o;}
+        });
+
+        if (!_.isUndefined(val)) {
+          results.obs = val.groupMembers;
         }
+
+        return results;
       }
 
       function _addObsToSection(sectionModel, restObs) {
@@ -92,13 +127,13 @@ jscs:disable disallowMixedSpacesAndTabs, requireDotNotation, requirePaddingNewLi
             var sectionFields = sectionModel[fieldKey];
             var sectionKeys = Object.keys(sectionFields);
             var concept = sectionFields[sectionKeys[0]];
-
+            var sectionObs = getGroupSectionObs(obsGroupData, concept);
             _addObsToSection(sectionFields, sectionObs);
 
           } else if (fieldKey.startsWith('obsRepeating')) {
             var sectionFields = sectionModel[fieldKey];
             var sectionKeys = Object.keys(sectionFields[0]);
-            $log.debug('Repeating section', sectionKeys);
+            // $log.debug('Repeating section', sectionKeys);
             // some repeating sections may miss the concept and schemaQuestion
             // attributes, therefore we will need to rebuild this b4 passing
             // it for processing
@@ -119,26 +154,26 @@ jscs:disable disallowMixedSpacesAndTabs, requireDotNotation, requirePaddingNewLi
 
         });
 
-        var field;
-        var questionModel = sectionModel[o.concept];
-        var schemaQuestion = questionModel[0].schemaQuestion;
-
-        if (questionModel[0].obsId === undefined) {
-          field = getFormlyFieldByModelKey('concept', o.concept, formlyFields, true).field;
-        } else if (allowsRepeating(schemaQuestion)) {
-          var index = 1 + getFormlyFieldByModelKey('concept', o.concept, formlyFields, true).index;
-          insertIntoFormlyFields(index, schemaQuestion, formlyFields, sectionModel, questionMap);
-          field = formlyFields[index];
-        }
-
-        //console.log("found field:",field);
-        if (field) {
-          addObsToFormlyField(o, field, questionMap);
-          return true;
-        } else {
-          $log.debug('NO FIELD FOUND FOR OBS: ', o);
-          return false;
-        }
+        // var field;
+        // var questionModel = sectionModel[o.concept];
+        // var schemaQuestion = questionModel[0].schemaQuestion;
+        //
+        // if (questionModel[0].obsId === undefined) {
+        //   field = getFormlyFieldByModelKey('concept', o.concept, formlyFields, true).field;
+        // } else if (allowsRepeating(schemaQuestion)) {
+        //   var index = 1 + getFormlyFieldByModelKey('concept', o.concept, formlyFields, true).index;
+        //   insertIntoFormlyFields(index, schemaQuestion, formlyFields, sectionModel, questionMap);
+        //   field = formlyFields[index];
+        // }
+        //
+        // //console.log("found field:",field);
+        // if (field) {
+        //   addObsToFormlyField(o, field, questionMap);
+        //   return true;
+        // } else {
+        //   $log.debug('NO FIELD FOUND FOR OBS: ', o);
+        //   return false;
+        // }
       }
 
       function _getSections(model) {
