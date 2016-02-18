@@ -149,9 +149,10 @@ jscs:requirePaddingNewLinesBeforeLineComments, requireTrailingComma
         function createFieldKey(_question, _id) {
             var key;
             var fKey;
-            var id = _id + 1;
-            obsId = id;
+            var id;
             if (_question.type === 'obs') {
+              id = _id + 1;
+              obsId = id;
                 fKey = _question.questionOptions.concept;
                 key = 'obs' + id + '_' + fKey.replace(/-/gi, 'n'); // $$ Inserts a "$".
             } else if (_question.type === 'personAttribute') {
