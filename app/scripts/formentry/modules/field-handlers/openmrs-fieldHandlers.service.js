@@ -150,6 +150,7 @@ jscs:requirePaddingNewLinesBeforeLineComments, requireTrailingComma
             var key;
             var fKey;
             var id = _id + 1;
+            obsId = id;
             if (_question.type === 'obs') {
                 fKey = _question.questionOptions.concept;
                 key = 'obs' + id + '_' + fKey.replace(/-/gi, 'n'); // $$ Inserts a "$".
@@ -460,7 +461,7 @@ jscs:requirePaddingNewLinesBeforeLineComments, requireTrailingComma
                 if (_question.questionOptions.rendering === 'multiCheckbox') {
                     obsField['type'] = 'kendo-select-multiple';
                 } else if (_question.questionOptions.rendering === 'select') {
-                    obsField['type'] = 'ui-select-single';
+                    obsField['type'] = 'kendo-select';
                 } else {
                     obsField['type'] = 'radio';
                 }

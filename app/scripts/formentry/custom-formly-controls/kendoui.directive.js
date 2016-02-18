@@ -25,7 +25,37 @@ jscs:disable disallowMixedSpacesAndTabs, requireDotNotation, requirePaddingNewLi
 
         controller: function($scope, $log, $timeout) {
           var x = $scope.model[$scope.options.key.split('.')[0]]
-          //can be used when using getterSetter provided by model options     
+          //can be used when using getterSetter provided by model options
+          $scope.selectModel = function(val){
+            if(angular.isDefined(val)) {
+              x.value = val;
+            } else {
+              return x.value;
+            }
+          };//$scope.model[$scope.options.key];
+
+
+          $scope.selectOptions = {
+           dataTextField: 'name',
+           dataValueField: 'value',
+           valuePrimitive:true,
+           dataSource: $scope.to.options
+       };
+    }
+    });
+
+    formlyConfig.setType({
+      name: 'kendo-select',
+      // extends:"select",
+      wrapper: ['bootstrapLabel', 'bootstrapHasError', 'validation'],
+      template:'<div> ' +
+        '<select kendo-drop-down-list k-options="selectOptions" ' +
+        'ng-model="$scope.model[$scope.options.key]" style="width: 100%;"></select> ' +
+        '</div> ',
+
+        controller: function($scope, $log, $timeout) {
+          var x = $scope.model[$scope.options.key.split('.')[0]]
+          //can be used when using getterSetter provided by model options
           $scope.selectModel = function(val){
             if(angular.isDefined(val)) {
               x.value = val;
